@@ -1,3 +1,13 @@
+:root {
+  --plum: #5c2d3c;
+  --plum-dark: #43202c;
+  --plum-soft: #7a4a5b;
+  --cream: #f6f0e4;
+  --cream-light: #fffaf1;
+  --tan: #cfbfa6;
+  --text: #2b1d22;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -5,6 +15,8 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  color: #202020;
-  background: #ffffff;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--cream) 0%, #ebe1cf 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
