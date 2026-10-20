@@ -8,5 +8,6 @@ export type Assignment = {
   course: string
   deadline: string
   status: AssignmentStatus
-  difficulty: AssignmentDifficulty
+  difficulty: AssignmentDifficulty    
 }
+export type AssignmentDraft = Omit<Assignment, 'id'>
