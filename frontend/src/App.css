@@ -286,3 +286,46 @@ nav {
   outline: 3px solid var(--plum);
   outline-offset: 2px;
 }
+/* Сообщения о загрузке справочника курсов */
+.course-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--cream-light);
+  border: 1px dashed var(--plum-soft);
+  color: var(--plum-dark);
+}
+
+.course-status p {
+  margin: 0;
+}
+
+.course-status-error {
+  background: #f7e3e6;
+}
+
+.course-status button {
+  padding: 6px 14px;
+  border: 1px solid var(--plum);
+  border-radius: 999px;
+  background: var(--cream-light);
+  color: var(--plum);
+  font: inherit;
+  cursor: pointer;
+}
+
+.course-status button:hover {
+  background: var(--plum);
+  color: var(--cream);
+}
+
+/* Недоступные элементы выглядят неактивными */
+.assignment-form select:disabled,
+.form-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

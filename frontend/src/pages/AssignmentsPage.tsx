@@ -2,15 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { AssignmentCard } from '../components/AssignmentCard'
 import { statusLabels } from '../data/labels'
+import { useCourses } from '../hooks/useCourses' // НОВОЕ
 import type { Assignment, AssignmentStatus } from '../types/assignment'
 
 type AssignmentsPageProps = { assignments: Assignment[] }
 
-// Фильтр: один из статусов или особое значение 'all' («Все»).
 type StatusFilter = AssignmentStatus | 'all'
 
-// Значение из <select> приходит строкой. Проверяем, что оно допустимо,
-// и только тогда считаем его типом StatusFilter (без any).
 function isStatusFilter(value: string): value is StatusFilter {
   return (
     value === 'all' ||
@@ -21,12 +19,20 @@ function isStatusFilter(value: string): value is StatusFilter {
 }
 
 export function AssignmentsPage({ assignments }: AssignmentsPageProps) {
-  // Выбранный фильтр: локальное состояние страницы.
-  // Общий список в App от него не зависит.
   const [status, setStatus] = useState<StatusFilter>('all')
 
-  // Отбор ВЫЧИСЛЯЕТСЯ из полного списка при каждой отрисовке.
-  // Мы не сохраняем его и не вызываем setAssignments: записи не удаляются.
+  // НОВОЕ: один запрос справочника на всю страницу
+  const { load } = useCourses()
+
+  // НОВОЕ: слово «название» ищем по id в загруженном справочнике.
+  // Пока грузится, показываем «…»; если запрос упал или id неизвестен, показываем сам код.
+  function courseLabel(courseId: string): string {
+    if (load.status === 'loading') return '…'
+    if (load.status === 'error') return courseId
+    const course = load.data.find((item) => item.id === courseId)
+    return course ? course.name : courseId
+  }
+
   const visibleAssignments = assignments.filter(
     (item) => status === 'all' || item.status === status,
   )
@@ -36,7 +42,6 @@ export function AssignmentsPage({ assignments }: AssignmentsPageProps) {
       <h1>Мои задания</h1>
       <Link to="/assignments/new">Добавить задание</Link>
 
-      {/* Фильтр показываем, только если записи вообще есть */}
       {assignments.length > 0 && (
         <div className="filter">
           <label htmlFor="status-filter">Статус</label>
@@ -53,14 +58,12 @@ export function AssignmentsPage({ assignments }: AssignmentsPageProps) {
             <option value="in_progress">{statusLabels.in_progress}</option>
             <option value="done">{statusLabels.done}</option>
           </select>
-          {/* Сброс возвращает фильтр в «Все» */}
           <button type="button" onClick={() => setStatus('all')}>
             Сбросить фильтр
           </button>
         </div>
       )}
 
-      {/* Три состояния: записей нет / нет совпадений / показываем список */}
       {assignments.length === 0 ? (
         <p>Заданий пока нет.</p>
       ) : visibleAssignments.length === 0 ? (
@@ -68,7 +71,11 @@ export function AssignmentsPage({ assignments }: AssignmentsPageProps) {
       ) : (
         <div className="assignment-list">
           {visibleAssignments.map((assignment) => (
-            <AssignmentCard key={assignment.id} assignment={assignment} />
+            <AssignmentCard
+              key={assignment.id}
+              assignment={assignment}
+              courseName={courseLabel(assignment.course)}
+            />
           ))}
         </div>
       )}
