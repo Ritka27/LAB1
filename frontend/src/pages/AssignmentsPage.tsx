@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { AssignmentCard } from '../components/AssignmentCard'
 import { statusLabels } from '../data/labels'
-import { useCourses } from '../hooks/useCourses' // НОВОЕ
+import { useCourses } from '../hooks/useCourses'
 import type { Assignment, AssignmentStatus } from '../types/assignment'
 
 type AssignmentsPageProps = { assignments: Assignment[] }
@@ -21,11 +21,9 @@ function isStatusFilter(value: string): value is StatusFilter {
 export function AssignmentsPage({ assignments }: AssignmentsPageProps) {
   const [status, setStatus] = useState<StatusFilter>('all')
 
-  // НОВОЕ: один запрос справочника на всю страницу
   const { load } = useCourses()
 
-  // НОВОЕ: слово «название» ищем по id в загруженном справочнике.
-  // Пока грузится, показываем «…»; если запрос упал или id неизвестен, показываем сам код.
+  // название курса по id; пока грузится «…», при ошибке или неизвестном id сам код
   function courseLabel(courseId: string): string {
     if (load.status === 'loading') return '…'
     if (load.status === 'error') return courseId

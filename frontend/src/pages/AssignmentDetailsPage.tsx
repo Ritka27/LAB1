@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router'
 import { difficultyLabels, statusLabels } from '../data/labels'
-import { useCourses } from '../hooks/useCourses' // НОВОЕ
+import { useCourses } from '../hooks/useCourses'
 import type { Assignment } from '../types/assignment'
 
 type AssignmentDetailsPageProps = {
@@ -14,7 +14,6 @@ export function AssignmentDetailsPage({
 }: AssignmentDetailsPageProps) {
   const { id } = useParams()
   const navigate = useNavigate()
-  // НОВОЕ: все хуки вызываем ДО условного return (правило порядка хуков)
   const { load } = useCourses()
   const assignment = assignments.find((item) => item.id === id)
 
@@ -28,7 +27,7 @@ export function AssignmentDetailsPage({
     )
   }
 
-  // НОВОЕ: название курса из справочника, с запасным вариантом — сам код
+  // название курса из справочника, запасной вариант — сам код
   let courseName = assignment.course
   if (load.status === 'loading') courseName = '…'
   if (load.status === 'success') {

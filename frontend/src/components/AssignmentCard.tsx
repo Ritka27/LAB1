@@ -2,8 +2,7 @@ import { Link } from 'react-router'
 import type { Assignment } from '../types/assignment'
 import { difficultyLabels, statusLabels } from '../data/labels'
 
-// НОВОЕ: карточка получает не только задание, но и готовое название курса.
-// Сама она справочник не грузит: иначе было бы пять запросов вместо одного.
+// название курса приходит готовым: карточка сама справочник не грузит
 type AssignmentCardProps = {
   assignment: Assignment
   courseName: string
