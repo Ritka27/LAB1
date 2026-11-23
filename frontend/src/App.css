@@ -329,3 +329,24 @@ nav {
   opacity: 0.55;
   cursor: not-allowed;
 }
+/* ЛР 5: кнопка «Обновить справочник» — по ширине текста, а не на всю форму */
+.course-refresh {
+  justify-self: start;
+  padding: 6px 14px;
+  border: 1px solid var(--plum);
+  border-radius: 999px;
+  background: var(--cream-light);
+  color: var(--plum);
+  font: inherit;
+  cursor: pointer;
+}
+
+.course-refresh:hover:not(:disabled) {
+  background: var(--plum);
+  color: var(--cream);
+}
+
+.course-refresh:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

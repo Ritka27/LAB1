@@ -56,3 +56,49 @@
 7. Уход со страницы во время загрузки: устаревший ответ не влияет на другие страницы.
 8. После возврата данных: создание, редактирование, отмена, удаление и фильтр работают.
 9. `npm run build` и `npm run preview`: справочник доступен в готовой сборке.
+## ЛР 5: схема данных и справочник в Supabase
+
+Создана схема в PostgreSQL (Supabase), справочник курсов перенесён из `frontend/public/demo/courses.json` в таблицу `public.courses` и подключён к форме через `@supabase/supabase-js`. Основные записи (задания) пока остаются в состоянии `App`.
+
+### Схема таблиц
+
+| Таблица | Назначение | Ключ | Связь | Данные |
+|---|---|---|---|---|
+| `public.courses` | справочник курсов: `id`, `name` | PK `id` (text, те же id, что в JSON ЛР 4) | — | публичные |
+| `public.assignments` | задания: `id`, `owner_id`, `course_id`, `title`, `description`, `deadline`, `status`, `difficulty`, `created_at` | PK `id` (uuid, `gen_random_uuid()`) | FK `course_id` → `courses.id` (on update cascade, on delete restrict); FK `owner_id` → `auth.users.id` (on delete cascade) | личные (принадлежат пользователю) |
+
+Ограничения:
+
+- `courses`: `id` и `name` не пустые и без пробелов по краям; `name` уникальный.
+- `assignments`: все поля NOT NULL; `title` 3–100 символов после `btrim`; `description` не короче 10 символов после `btrim`; `status` ∈ (`todo`, `in_progress`, `done`); `difficulty` ∈ (`easy`, `medium`, `hard`).
+
+Соответствие полей: во frontend `course` = столбец `course_id`, `deadline` = столбец `deadline`.
+
+### Порядок применения SQL
+
+1. SQL Editor → вставить и выполнить целиком `supabase/migrations/202611062351_initial_schema.sql` (один раз).
+2. SQL Editor → вставить и выполнить `supabase/seed.sql` (можно повторять: UPSERT не создаёт новых id).
+
+Фактический порядок применения: _(заполнить после выполнения: дата, миграция → seed, были ли ошибки)_.
+
+### Модель доступа
+
+- `courses`: RLS включён; `anon` и `authenticated` имеют только `SELECT` (grant) и политику `courses are publicly readable` (`using (true)`). Запись в справочник из браузера запрещена.
+- `assignments`: RLS включён, все права клиентских ролей отозваны, политик нет. Браузер не может читать и менять строки до ЛР 6.
+
+### Frontend
+
+- `src/lib/supabase.ts` — единый клиент; без переменных окружения бросает ошибку настройки.
+- `src/services/courses.ts` — `getCourses` читает `courses` (`select('id, name')`, `order('name')`, `abortSignal`), проверяет `error` и структуру (`parseCourses`).
+- `AssignmentForm` — кнопка «Обновить справочник» повторяет загрузку, черновик сохраняется.
+- `public/demo/courses.json` удалён, скрытого fallback нет.
+
+### Проверка (сценарии)
+
+1. Чтение: в Network запрос к `https://<проект>.supabase.co/rest/v1/courses?select=id,name&order=name.asc`, в форме пять курсов.
+2. Ошибка: временно неверное имя таблицы в сервисе — ошибка и «Повторить», черновик остаётся.
+3. Пустой результат: `delete from public.courses;` (пока заданий нет, FK не мешает) — «Курсов пока нет»; снова выполнить `seed.sql` и нажать «Обновить справочник».
+4. Изменение name: `update public.courses set name = '...' where id = 'web';` → «Обновить справочник» показывает новое имя при прежнем id.
+5. Запрет записи: временный `insert` в `courses` из frontend возвращает ошибку доступа; `select` из `assignments` не возвращает строк / даёт permission denied.
+6. Без `.env.local` — ошибка «Не настроены переменные Supabase в .env.local».
+7. Локальный CRUD, отмена, фильтр и маршруты работают; `npm run build` и `npm run preview` проходят.
